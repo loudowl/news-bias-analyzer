@@ -28,59 +28,128 @@ Reuters · AP · BBC · NPR · CNN · MSNBC · Fox News · New York Times · Was
 
 ---
 
+## Prerequisites
+
+- **Python 3.10+** — check with `python3 --version`
+- **NewsAPI key** — free tier at [newsapi.org](https://newsapi.org) (100 requests/day)
+- **OpenAI API key** — [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+
+> **macOS note:** macOS ships without a `python` command — only `python3`. Either use `python3` in all commands below, or add `alias python="python3"` to your `~/.zshrc` and restart your terminal.
+
+---
+
 ## Setup
+
+### 1. Clone the repo
 
 ```bash
 git clone https://github.com/loudowl/news-bias-analyzer.git
 cd news-bias-analyzer
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env   # add your API keys
 ```
 
-**API keys needed:**
-- [NewsAPI](https://newsapi.org) — free tier, 100 requests/day
-- [OpenAI](https://platform.openai.com/api-keys) — GPT-4o for analysis
+### 2. Create and activate a virtual environment
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate      # macOS / Linux
+# .venv\Scripts\activate       # Windows
+```
+
+You should see `(.venv)` in your prompt. **All subsequent commands assume the venv is active.**
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Add your API keys
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in both keys:
+
+```
+NEWS_API_KEY=your-newsapi-key-here
+OPENAI_API_KEY=sk-...
+```
 
 ---
 
-## Usage
+## Running the project
 
 ### Web server + scheduler (recommended)
 
 ```bash
-python serve.py
+python3 serve.py
 ```
 
 This starts two things at once:
-- A web server at **http://localhost:8080** serving the latest report
-- A scheduler that auto-generates a new report at **08:00, 12:00, and 17:00** daily
 
-Each run saves a timestamped file to `archive/`. The home page always shows the most recent report with a paginated archive nav at the bottom linking to all previous runs.
+- A web server at **http://localhost:8080** — always shows the latest report
+- A background scheduler that auto-generates a new report at **08:00, 12:00, and 17:00** daily
+
+Each run saves a timestamped file to `archive/`. The home page shows the most recent report with a paginated archive nav at the bottom linking to every previous run.
 
 ```bash
-# Custom port or schedule hours
-python serve.py --port 3000 --times 7,13,18
+# Custom port
+python3 serve.py --port 3000
+
+# Custom schedule (24h hours, comma-separated)
+python3 serve.py --times 7,13,18
+
+# Both
+python3 serve.py --port 3000 --times 7,13,18
 ```
 
-### One-off report
+Press **Ctrl+C** to stop the server and scheduler.
+
+---
+
+### Generate a single report (no server)
 
 ```bash
-# Full run — all 14 outlets — saves to archive/YYYY-MM-DD_HH-MM.html
-python main.py
+python3 main.py
+```
 
-# Custom output path
-python main.py --output my_report.html
+Saves to `archive/YYYY-MM-DD_HH-MM.html`. Open the file directly in any browser.
 
-# Specific outlets only
-python main.py --sources cnn,fox-news,bbc-news,the-new-york-times
+```bash
+# Save to a custom path instead
+python3 main.py --output my_report.html
 
-# Use gpt-4o-mini for faster/cheaper runs
-python main.py --model gpt-4o-mini
+# Analyse specific outlets only
+python3 main.py --sources cnn,fox-news,bbc-news,the-new-york-times
+
+# Use gpt-4o-mini for faster, cheaper runs (~80% less cost)
+python3 main.py --model gpt-4o-mini
 
 # Save raw API responses for debugging
-python main.py --save-raw
+python3 main.py --save-raw
 ```
+
+Available source IDs: `reuters`, `associated-press`, `bbc-news`, `npr`, `cnn`, `msnbc`, `fox-news`, `the-new-york-times`, `the-washington-post`, `the-wall-street-journal`, `the-guardian-us`, `the-hill`, `politico`, `breitbart-news`
+
+---
+
+## Troubleshooting
+
+**`command not found: python`**
+Use `python3` instead, or add `alias python="python3"` to `~/.zshrc` and run `source ~/.zshrc`.
+
+**`ModuleNotFoundError`**
+Your venv isn't active. Run `source .venv/bin/activate` first.
+
+**`Missing environment variables`**
+The `.env` file is missing or incomplete. Make sure both `NEWS_API_KEY` and `OPENAI_API_KEY` are set.
+
+**`429` from NewsAPI**
+The free tier allows 100 requests/day. Three scheduled runs × 14 sources = 42 requests/day — well within the limit. If you hit the cap, it resets at midnight UTC.
+
+**Port 8080 already in use**
+Run `python3 serve.py --port 3001` (or any free port).
 
 ---
 
