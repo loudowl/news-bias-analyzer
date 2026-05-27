@@ -7,7 +7,7 @@ SOURCES = [
     {"id": "reuters",               "name": "Reuters",              "category": "Wire"},
     {"id": "associated-press",      "name": "Associated Press",     "category": "Wire"},
     {"id": "bbc-news",              "name": "BBC News",             "category": "International"},
-    {"id": "npm",                   "name": "NPR",                  "category": "US Broadcast"},
+    {"id": "npr",                   "name": "NPR",                  "category": "US Broadcast"},
     {"id": "cnn",                   "name": "CNN",                  "category": "US Cable"},
     {"id": "msnbc",                 "name": "MSNBC",                "category": "US Cable"},
     {"id": "fox-news",              "name": "Fox News",             "category": "US Cable"},
