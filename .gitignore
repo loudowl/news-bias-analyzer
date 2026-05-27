@@ -1,0 +1,11 @@
+.env
+*.env
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+report.html
+reports/
+raw_data.json
+.DS_Store
