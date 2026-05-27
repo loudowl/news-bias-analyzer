@@ -8,7 +8,7 @@ This is an experiment in applied NLP — using LLMs to characterize language pat
 
 ## What it produces
 
-A single `report.html` file with five interactive charts:
+A timestamped HTML report saved to `archive/` with five interactive charts:
 
 | Chart | What it shows |
 |---|---|
@@ -46,12 +46,31 @@ cp .env.example .env   # add your API keys
 
 ## Usage
 
+### Web server + scheduler (recommended)
+
 ```bash
-# Full run — all 14 outlets
+python serve.py
+```
+
+This starts two things at once:
+- A web server at **http://localhost:8080** serving the latest report
+- A scheduler that auto-generates a new report at **08:00, 12:00, and 17:00** daily
+
+Each run saves a timestamped file to `archive/`. The home page always shows the most recent report with a paginated archive nav at the bottom linking to all previous runs.
+
+```bash
+# Custom port or schedule hours
+python serve.py --port 3000 --times 7,13,18
+```
+
+### One-off report
+
+```bash
+# Full run — all 14 outlets — saves to archive/YYYY-MM-DD_HH-MM.html
 python main.py
 
 # Custom output path
-python main.py --output analysis_may2026.html
+python main.py --output my_report.html
 
 # Specific outlets only
 python main.py --sources cnn,fox-news,bbc-news,the-new-york-times
@@ -62,8 +81,6 @@ python main.py --model gpt-4o-mini
 # Save raw API responses for debugging
 python main.py --save-raw
 ```
-
-Open `report.html` in any browser — no server needed.
 
 ---
 
@@ -94,12 +111,14 @@ Scores are based on today's headlines only and will vary day to day based on wha
 - [OpenAI GPT-4o](https://platform.openai.com) — structured language analysis
 - [Plotly](https://plotly.com/python/) — interactive charts
 - [pandas](https://pandas.pydata.org) — data shaping
+- [Flask](https://flask.palletsprojects.com) — web server
+- [APScheduler](https://apscheduler.readthedocs.io) — scheduled runs
 
 ---
 
 ## Ideas for extending this
 
-- [ ] Run on a schedule and track lean/sentiment drift over time
+- [x] Run on a schedule and track lean/sentiment drift over time
 - [ ] Add a comparison view: "today vs. 30-day average"
 - [ ] Include full article text (NewsAPI paid tier) for deeper analysis
 - [ ] Add international outlets (Al Jazeera, RT, DW, etc.)

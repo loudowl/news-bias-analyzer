@@ -7,5 +7,6 @@ venv/
 env/
 report.html
 reports/
+archive/
 raw_data.json
 .DS_Store

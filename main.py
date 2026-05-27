@@ -17,6 +17,7 @@ import argparse
 import json
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -36,8 +37,8 @@ def parse_args():
         epilog=__doc__,
     )
     parser.add_argument(
-        "--output", "-o", default="report.html",
-        help="Output file path (default: report.html)",
+        "--output", "-o", default=None,
+        help="Output file path (default: archive/YYYY-MM-DD_HH-MM.html)",
     )
     parser.add_argument(
         "--sources", "-s", default=None,
@@ -71,6 +72,9 @@ def main():
     args = parse_args()
     check_env()
 
+    Path("archive").mkdir(exist_ok=True)
+    output = args.output or f"archive/{datetime.now().strftime('%Y-%m-%d_%H-%M')}.html"
+
     # Resolve source list
     if args.sources:
         ids = [s.strip() for s in args.sources.split(",")]
@@ -87,7 +91,7 @@ def main():
     print(f"\n📰 News Bias Analyzer")
     print(f"   Sources : {len(sources)}")
     print(f"   Model   : {args.model}")
-    print(f"   Output  : {args.output}")
+    print(f"   Output  : {output}")
     print("=" * 50)
 
     # ── Step 1: Fetch headlines ───────────────────────────────────────────────
@@ -116,11 +120,10 @@ def main():
 
     # ── Step 4: Build HTML report ─────────────────────────────────────────────
     print("\n📄 Building report...")
-    output_path = build_report(analysis_results, output_path=args.output)
+    output_path = build_report(analysis_results, output_path=output)
 
     print("\n" + "=" * 50)
     print(f"✅  Report saved to: {Path(output_path).resolve()}")
-    print(f"    Open it in your browser to explore the charts.")
     print("=" * 50 + "\n")
 
 
